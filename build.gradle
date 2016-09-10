@@ -1,0 +1,25 @@
+group 'de.intektor.'
+version '1.0.0'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.6
+
+repositories {
+    mavenCentral()
+	mavenLocal();
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'de.intektor.pixelshooter_main_server.Main'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+dependencies {
+	compile 'mysql:mysql-connector-java:6.0.3'
+	compile 'de.intektor:pixelshooter_common:1.0.0'
+}
