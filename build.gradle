@@ -20,6 +20,6 @@ task fatJar(type: Jar) {
 }
 
 dependencies {
-	compile 'mysql:mysql-connector-java:6.0.3'
-	compile 'de.intektor:pixelshooter_common:1.0.0'
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.39'
+    compile 'de.intektor:pixelshooter_common:1.0.0'
 }

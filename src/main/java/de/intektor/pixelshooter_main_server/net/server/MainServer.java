@@ -8,9 +8,10 @@ import de.intektor.pixelshooter_common.packet.PacketRegistry;
 
 import javax.net.ssl.*;
 import java.io.DataInputStream;
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.Socket;
 import java.security.KeyStore;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -82,21 +83,21 @@ public class MainServer {
         try {
             TrustManager[] trustAllCerts = new TrustManager[]{
                     new X509TrustManager() {
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        public X509Certificate[] getAcceptedIssuers() {
                             return null;
                         }
 
-                        public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
                         }
 
-                        public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
                         }
                     }
             };
             SSLContext sslContext;
             sslContext = SSLContext.getInstance("TLS");
             KeyStore ks = KeyStore.getInstance("jks");
-            FileInputStream stream = new FileInputStream("keystore.jks");
+            InputStream stream = MainServer.class.getResourceAsStream("/keystore.jks");
             ks.load(stream, "HartesPasswort123$$".toCharArray());
             KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
             kmf.init(ks, "HartesPasswort123$$".toCharArray());

@@ -1,7 +1,5 @@
 package de.intektor.pixelshooter_main_server.net.server;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -41,13 +39,9 @@ public class MainThread extends Thread {
             e.printStackTrace();
         }
 
-        try {
-            Scanner scanner = new Scanner(new FileInputStream("TagList.txt"));
-            while (scanner.hasNext()) {
-                tagList.add(scanner.next());
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        Scanner scanner = new Scanner(MainThread.class.getResourceAsStream("/TagList.txt"));
+        while (scanner.hasNext()) {
+            tagList.add(scanner.next());
         }
 
         while (server.runServer) {

@@ -8,6 +8,7 @@ import de.intektor.pixelshooter_main_server.net.server.MainServer;
 import de.intektor.pixelshooter_main_server.net.server.packet_handler.*;
 
 import javax.net.ssl.SSLSocket;
+import java.io.InputStream;
 import java.util.Scanner;
 
 /**
@@ -30,21 +31,18 @@ public class Main {
         String sqlUsername = "root";
         String sqlPassword = "123456";
 
-        for (int i = 0; i < args.length; i += 2) {
-            String argument = args[i];
-            String value = args[i + 1];
-            if (argument.equals("-sqlip")) {
-                sqlIP = value.substring(1);
-            } else if (argument.equals("-sqlusername")) {
-                sqlUsername = value.substring(1);
-            } else if (argument.equals("-sqluserpassword")) {
-                sqlPassword = value.substring(1);
-            }
+        InputStream config = Main.class.getResourceAsStream("/start.psconfig");
+        if (config != null) {
+            Scanner scanner = new Scanner(config);
+            sqlIP = scanner.next();
+            sqlUsername = scanner.next();
+            sqlPassword = scanner.next();
         }
 
         final String finalSqlIP = sqlIP;
         final String finalSqlUsername = sqlUsername;
         final String finalSqlPassword = sqlPassword;
+
         new Thread() {
             @Override
             public void run() {
