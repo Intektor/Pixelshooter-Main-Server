@@ -27,6 +27,9 @@ public class TokenVerifier {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
         return idToken;
     }

@@ -35,6 +35,41 @@ public class MainThread extends Thread {
             properties.setProperty("useSSL", "false");
             properties.setProperty("serverTimezone", "GMT");
             connection = DriverManager.getConnection("jdbc:mysql://" + ip + "/pixelshooter?user=" + username + "&password=" + password, properties);
+            connection.prepareStatement("CREATE TABLE IF NOT EXISTS `downloadcounttable` (\n" +
+                    "  `id` int(11) NOT NULL AUTO_INCREMENT,\n" +
+                    "  `player_uuid` varchar(45) NOT NULL,\n" +
+                    "  `official_id` varchar(45) NOT NULL,\n" +
+                    "  PRIMARY KEY (`id`)\n" +
+                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n").execute();
+            connection.prepareStatement("CREATE TABLE IF NOT EXISTS `pixelshooterleveldatabase` (\n" +
+                    "  `id` int(11) NOT NULL AUTO_INCREMENT,\n" +
+                    "  `official_id` varchar(45) NOT NULL,\n" +
+                    "  `user_email` varchar(45) NOT NULL,\n" +
+                    "  `time_uploaded` bigint(20) NOT NULL,\n" +
+                    "  `level_name` varchar(45) NOT NULL,\n" +
+                    "  `show_user_email` bit(1) NOT NULL,\n" +
+                    "  `private` bit(1) NOT NULL,\n" +
+                    "  `downloadcount` bigint(20) DEFAULT '0',\n" +
+                    "  `playcount` bigint(20) DEFAULT '0',\n" +
+                    "  `total_rating` double DEFAULT '0',\n" +
+                    "  `total_rated` int(11) DEFAULT '0',\n" +
+                    "  PRIMARY KEY (`id`),\n" +
+                    "  UNIQUE KEY `id_UNIQUE` (`id`)\n" +
+                    ") ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;\n").execute();
+            connection.prepareStatement("CREATE TABLE IF NOT EXISTS `playcounttable` (\n" +
+                    "  `id` int(11) NOT NULL AUTO_INCREMENT,\n" +
+                    "  `player_uuid` varchar(45) NOT NULL,\n" +
+                    "  `official_id` varchar(45) NOT NULL,\n" +
+                    "  PRIMARY KEY (`id`)\n" +
+                    ") ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;\n").execute();
+            connection.prepareStatement("CREATE TABLE IF NOT EXISTS `ratingtable` (\n" +
+                    "  `id` int(11) NOT NULL AUTO_INCREMENT,\n" +
+                    "  `user_email` varchar(45) NOT NULL,\n" +
+                    "  `official_id` varchar(45) NOT NULL,\n" +
+                    "  `rated` int(11) NOT NULL,\n" +
+                    "  PRIMARY KEY (`id`)\n" +
+                    ") ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;\n").execute();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

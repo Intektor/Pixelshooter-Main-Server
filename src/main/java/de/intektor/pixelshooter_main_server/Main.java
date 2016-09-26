@@ -27,9 +27,9 @@ public class Main {
         PacketRegistry.INSTANCE.registerHandlerForPacket(RatingPacketToServer.class, RatingPacketToServerHandler.class);
         PacketRegistry.INSTANCE.registerHandlerForPacket(ClientVersionPacketToServer.class, ClientVersionPacketToServerHandler.class);
 
-        String sqlIP = "localhost";
+        String sqlIP = "84.200.24.127";
         String sqlUsername = "root";
-        String sqlPassword = "123456";
+        String sqlPassword = "4!cRAbreph2!";
 
         InputStream config = Main.class.getResourceAsStream("/start.psconfig");
         if (config != null) {
