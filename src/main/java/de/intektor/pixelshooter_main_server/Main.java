@@ -26,10 +26,11 @@ public class Main {
         PacketRegistry.INSTANCE.registerHandlerForPacket(LevelActionPacketToServer.class, LevelActionPacketToServerHandler.class);
         PacketRegistry.INSTANCE.registerHandlerForPacket(RatingPacketToServer.class, RatingPacketToServerHandler.class);
         PacketRegistry.INSTANCE.registerHandlerForPacket(ClientVersionPacketToServer.class, ClientVersionPacketToServerHandler.class);
+        PacketRegistry.INSTANCE.registerHandlerForPacket(CampaignWorldsUpdateRequestPacketToServer.class, CampaignWorldsUpdateRequestPacketToServerHandler.class);
 
-        String sqlIP = "84.200.24.127";
+        String sqlIP = "localhost";
         String sqlUsername = "root";
-        String sqlPassword = "4!cRAbreph2!";
+        String sqlPassword = "123456";
 
         InputStream config = Main.class.getResourceAsStream("/start.psconfig");
         if (config != null) {
