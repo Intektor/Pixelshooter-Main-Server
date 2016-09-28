@@ -12,9 +12,10 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * @author Intektor
@@ -26,6 +27,8 @@ public class MainServer {
     volatile boolean runServer = true;
 
     public volatile List<SSLSocket> connectionList = Collections.synchronizedList(new ArrayList<SSLSocket>());
+
+    public volatile Map<SSLSocket, ConnectionThread> threadMap = new ConcurrentHashMap<SSLSocket, ConnectionThread>();
 
     public MainServer(int port) {
         this.port = port;
@@ -42,24 +45,9 @@ public class MainServer {
         while (runServer) {
             final SSLSocket clientSocket = (SSLSocket) serverSocket.accept();
             connectionList.add(clientSocket);
-            new Thread() {
-                @Override
-                public void run() {
-                    boolean active = true;
-                    while (runServer && active) {
-                        try {
-                            Packet packet = PacketHelper.readPacket(new DataInputStream(clientSocket.getInputStream()));
-                            if (onPacketReceivedPRE(clientSocket, packet)) {
-                                PacketRegistry.INSTANCE.getHandlerForPacketClass(packet.getClass()).newInstance().handlePacket(packet, clientSocket, Side.CLIENT);
-                                onPacketReceivedPOST(clientSocket, packet);
-                            }
-                        } catch (Throwable t) {
-                            active = false;
-                            connectionList.remove(clientSocket);
-                        }
-                    }
-                }
-            }.start();
+            ConnectionThread t = new ConnectionThread(this, clientSocket);
+            t.start();
+            threadMap.put(clientSocket, t);
         }
     }
 
@@ -72,10 +60,25 @@ public class MainServer {
 
     }
 
+    public synchronized void removeConnection(SSLSocket socket) {
+        connectionList.remove(socket);
+        threadMap.remove(socket);
+    }
+
     public void stopServer() {
         runServer = false;
-        for (SSLSocket sslSocket : connectionList) {
-            PacketHelper.sendPacket(new ServerShutdownPacketToClient(), sslSocket);
+        try {
+            mainThread.connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        for (final ConnectionThread t : threadMap.values()) {
+            t.addScheduledTask(new Runnable() {
+                @Override
+                public void run() {
+                    PacketHelper.sendPacket(new ServerShutdownPacketToClient(), t.clientSocket);
+                }
+            });
         }
     }
 
@@ -105,6 +108,45 @@ public class MainServer {
             return sslContext;
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static class ConnectionThread extends Thread {
+
+        MainServer server;
+
+        public SSLSocket clientSocket;
+
+        public ConnectionThread(MainServer server, SSLSocket socket) {
+            this.server = server;
+            this.clientSocket = socket;
+        }
+
+        Queue<Runnable> scheduledTasks = new LinkedBlockingDeque<Runnable>();
+
+        @Override
+        public void run() {
+            boolean active = true;
+            while (server.runServer && active) {
+                try {
+                    Packet packet = PacketHelper.readPacket(new DataInputStream(clientSocket.getInputStream()));
+                    if (server.onPacketReceivedPRE(clientSocket, packet)) {
+                        PacketRegistry.INSTANCE.getHandlerForPacketClass(packet.getClass()).newInstance().handlePacket(packet, clientSocket, Side.CLIENT);
+                        server.onPacketReceivedPOST(clientSocket, packet);
+                    }
+                    Runnable t;
+                    while ((t = scheduledTasks.poll()) != null) {
+                        t.run();
+                    }
+                } catch (Throwable t) {
+                    active = false;
+                    server.removeConnection(clientSocket);
+                }
+            }
+        }
+
+        public synchronized void addScheduledTask(Runnable task) {
+            scheduledTasks.add(task);
         }
     }
 }

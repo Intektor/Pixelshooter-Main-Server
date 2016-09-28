@@ -80,7 +80,13 @@ public class Main {
             if (scanner.nextLine().equals("stop")) {
                 server.stopServer();
                 logger.info("Server was closed by the admin at: " + simpleDateFormat.format(new Date()));
-                System.exit(0);
+                try {
+                    server.mainThread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    System.exit(0);
+                }
             } else {
                 System.out.println("Type stop to stop the server!");
             }
