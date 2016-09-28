@@ -53,7 +53,7 @@ public class MainServer {
                                 PacketRegistry.INSTANCE.getHandlerForPacketClass(packet.getClass()).newInstance().handlePacket(packet, clientSocket, Side.CLIENT);
                                 onPacketReceivedPOST(clientSocket, packet);
                             }
-                        } catch (Exception e) {
+                        } catch (Throwable t) {
                             active = false;
                             connectionList.remove(clientSocket);
                         }

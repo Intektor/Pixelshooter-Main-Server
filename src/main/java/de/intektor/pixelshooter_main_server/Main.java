@@ -8,8 +8,12 @@ import de.intektor.pixelshooter_main_server.net.server.MainServer;
 import de.intektor.pixelshooter_main_server.net.server.packet_handler.*;
 
 import javax.net.ssl.SSLSocket;
+import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
+import java.util.logging.*;
 
 /**
  * @author Intektor
@@ -17,8 +21,20 @@ import java.util.Scanner;
 public class Main {
 
     public static volatile MainServer server;
+    public static Logger logger = Logger.getLogger("main.logger");
 
-    public static void main(String[] args) {
+    public static SimpleDateFormat simpleDateFormat;
+
+    public static void main(String[] args) throws IOException {
+        FileHandler fileHandler = new FileHandler("log.txt");
+        fileHandler.setFormatter(new SimpleFormatter());
+        StreamHandler streamHandler = new StreamHandler(System.out, new SimpleFormatter());
+        logger.addHandler(fileHandler);
+        logger.addHandler(streamHandler);
+
+        simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd:HH:mm:ss");
+        logger.info("Starting server at " + simpleDateFormat.format(new Date()));
+
         PixelShooterCommon.init();
         PacketRegistry.INSTANCE.registerHandlerForPacket(PublishLevelPacketToServer.class, PublishLevelPacketToServerHandler.class);
         PacketRegistry.INSTANCE.registerHandlerForPacket(BrowseCommunityLevelsLevelRequestToServer.class, BrowseCommunityLevelsLevelRequestToServerHandler.class);
@@ -51,7 +67,7 @@ public class Main {
                 try {
                     server.start(finalSqlIP, finalSqlUsername, finalSqlPassword);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.log(Level.WARNING, "Exception!", e);
                     for (SSLSocket sslSocket : server.connectionList) {
                         PacketHelper.sendPacket(new ServerShutdownPacketToClient(), sslSocket);
                     }
@@ -63,7 +79,7 @@ public class Main {
         while (true) {
             if (scanner.nextLine().equals("stop")) {
                 server.stopServer();
-                System.out.println("Stopping server");
+                logger.info("Server was closed by the admin at: " + simpleDateFormat.format(new Date()));
                 System.exit(0);
             } else {
                 System.out.println("Type stop to stop the server!");

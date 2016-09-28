@@ -21,6 +21,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+
+import static de.intektor.pixelshooter_main_server.Main.logger;
 
 /**
  * @author Intektor
@@ -110,7 +113,8 @@ public class BrowseCommunityLevelsLevelRequestToServerHandler implements PacketH
                     BrowseCommunityLevelRequestResponseToClient response = new BrowseCommunityLevelRequestResponseToClient(levelInfoList, packet.order, levelInfoList.size() == 30 ? BrowseCommunityLevelRequestResponseToClient.SupplyType.MORE : BrowseCommunityLevelRequestResponseToClient.SupplyType.LIMIT);
                     PacketHelper.sendPacket(response, socketFrom);
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    logger.log(Level.WARNING, "Exception!", e);
+                    Main.server.mainThread.checkConnection();
                 }
             }
         });

@@ -22,6 +22,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
+
+import static de.intektor.pixelshooter_main_server.Main.logger;
 
 /**
  * @author Intektor
@@ -71,7 +74,8 @@ public class PublishLevelPacketToServerHandler implements PacketHandler<PublishL
                 PacketHelper.sendPacket(new LevelPublishedPacketToClient(), socketFrom);
             } catch (SQLException e) {
                 PacketHelper.sendPacket(new InternalServerErrorWhilePublishingPacketToClient(), socketFrom);
-                e.printStackTrace();
+                logger.log(Level.WARNING, "Exception!", e);
+                Main.server.mainThread.checkConnection();
             }
         } else {
             PacketHelper.sendPacket(new BadAccessTokenPacketToClient(), socketFrom);

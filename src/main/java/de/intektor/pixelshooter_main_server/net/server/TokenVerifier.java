@@ -5,8 +5,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.Collections;
 
 /**
@@ -20,15 +18,10 @@ public class TokenVerifier {
                 .setIssuer("https://accounts.google.com")
                 .build();
 
-        GoogleIdToken idToken = null;
+        GoogleIdToken idToken;
         try {
             idToken = verifier.verify(userIdToken);
-        } catch (GeneralSecurityException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Throwable t) {
             return null;
         }
         return idToken;

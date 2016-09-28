@@ -5,6 +5,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
+
+import static de.intektor.pixelshooter_main_server.Main.logger;
 
 /**
  * @author Intektor
@@ -31,10 +34,7 @@ public class MainThread extends Thread {
     @Override
     public void run() {
         try {
-            Properties properties = new Properties();
-            properties.setProperty("useSSL", "false");
-            properties.setProperty("serverTimezone", "GMT");
-            connection = DriverManager.getConnection("jdbc:mysql://" + ip + "/pixelshooter?user=" + username + "&password=" + password, properties);
+            connectToSQLServer();
             connection.prepareStatement("CREATE TABLE IF NOT EXISTS `downloadcounttable` (\n" +
                     "  `id` int(11) NOT NULL AUTO_INCREMENT,\n" +
                     "  `player_uuid` varchar(45) NOT NULL,\n" +
@@ -71,7 +71,7 @@ public class MainThread extends Thread {
                     ") ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;\n").execute();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, "Exception!", e);
         }
 
         Scanner scanner = new Scanner(MainThread.class.getResourceAsStream("/TagList.txt"));
@@ -95,6 +95,32 @@ public class MainThread extends Thread {
 
     public synchronized void addScheduledTask(Runnable task) {
         tasks.offer(task);
+    }
+
+    public void checkConnection() {
+        try {
+            if (connection.isClosed()) {
+                logger.info("The SQL connection was closed after an exception thrown before!");
+                logger.info("Trying to recreate the connection to the SQL server!");
+                do {
+                    connectToSQLServer();
+                } while (connection.isClosed());
+            }
+        } catch (SQLException e) {
+            logger.log(Level.WARNING, "Exception!", e);
+        }
+    }
+
+    public void connectToSQLServer() {
+        Properties properties = new Properties();
+        properties.setProperty("useSSL", "false");
+        properties.setProperty("serverTimezone", "GMT");
+        try {
+            connection = DriverManager.getConnection("jdbc:mysql://" + ip + "/pixelshooter?user=" + username + "&password=" + password, properties);
+        } catch (SQLException ignored) {
+
+        }
+
     }
 }
 

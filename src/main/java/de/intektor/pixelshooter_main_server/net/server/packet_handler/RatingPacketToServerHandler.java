@@ -12,6 +12,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
+
+import static de.intektor.pixelshooter_main_server.Main.logger;
 
 /**
  * @author Intektor
@@ -43,7 +46,8 @@ public class RatingPacketToServerHandler implements PacketHandler<RatingPacketTo
                             update.execute();
                         }
                     } catch (SQLException e) {
-                        e.printStackTrace();
+                        logger.log(Level.WARNING, "Exception!", e);
+                        Main.server.mainThread.checkConnection();
                     }
                 }
             }

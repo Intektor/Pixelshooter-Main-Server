@@ -15,8 +15,10 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
 
 import static de.intektor.pixelshooter_common.net.packet.CampaignWorldsUpdateRequestResponseToClient.*;
+import static de.intektor.pixelshooter_main_server.Main.logger;
 
 /**
  * @author Intektor
@@ -64,10 +66,9 @@ public class CampaignWorldsUpdateRequestPacketToServerHandler implements PacketH
                         sendingPacket = new CampaignWorldsUpdateRequestResponseToClient(new ArrayList<CampaignWorld>(), false, version);
                     }
                     PacketHelper.sendPacket(sendingPacket, socketFrom);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (Throwable t) {
+                    logger.log(Level.WARNING, "Exception!", t);
+                    Main.server.mainThread.checkConnection();
                 }
             }
         });
